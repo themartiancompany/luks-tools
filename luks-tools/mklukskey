@@ -1,0 +1,10 @@
+#!/usr/bin/zsh
+
+# name
+_luks_gen_key_file() {
+  local _output_path
+  _output_path="/etc/keys"
+  dd if=/dev/random bs=32 count=1 of="${_output_path}/${1}.key"
+}
+
+_luks_gen_key_file "${1}"
