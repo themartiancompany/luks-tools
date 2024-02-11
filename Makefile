@@ -15,6 +15,6 @@ shellcheck:
 
 install:
 
-	install -vDm 755 luks-tools/mkluks "$(BIN_DIR)/mkluks"
+	install -vDm 755 luks-tools/mklukskey "$(BIN_DIR)/mklukskey"
 
 .PHONY: check install shellcheck
