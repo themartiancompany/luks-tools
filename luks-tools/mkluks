@@ -149,6 +149,7 @@ _set() {
 
   printf \
     -v "${_obj}_${_var}" \
+    "%s" \
     "${_value}"
 }
 
