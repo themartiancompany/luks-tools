@@ -423,7 +423,7 @@ _set_overrides() {
 # $1: exit status number.
 _usage() {
   local \
-    usage_text
+    _usage_text
   IFS='' \
     read \
       -r \
