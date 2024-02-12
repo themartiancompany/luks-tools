@@ -77,15 +77,25 @@ _msg_info() {
     _msg=(
       "$@"
     ) \
+    _fmt_line=() \
     _line
   [[ "${quiet}" == "y" ]] || \
     for _line \
       in "${_msg[@]}"; do
+      # _fmt_line+=(
+      #   "$( \
+      #     printf \
+      #       '[%s] INFO: %s\n' \
+      #       "${app_name}" \
+      #       "${_line}")"
+      # )
       _printf \
         '[%s] INFO: %s\n' \
         "${app_name}" \
         "${_line}"
     done
+    # _printf \
+    #   "${_fmt_line[*]}"
 }
 
 # Show a WARNING message
@@ -195,11 +205,11 @@ _get() {
 _mkluks() {
   local \
     _device="${1}" \
-    _label="${2}"
+    _label="${2}" \
     _key_file="${3}" \
     _fsuuid="${4}" \
     _grub_compatibility="${5}" \
-    _read_only="${6}"
+    _read_only="${6}" \
     _opts=() \
     _config_cmd=() \
     _config_opts=() \
@@ -213,6 +223,10 @@ _mkluks() {
   _cryptsetup_opts=(
     "$@"
   )
+  [[ ! -e "${_device}" ]] && \
+    _msg_error \
+      "device file '${_device}' does not exist" \
+      1
   _tmpdir="$( \
     mktemp \
       -d)"
@@ -367,7 +381,7 @@ _set_overrides() {
     "false"
   if [[ -v override_read_only ]]; then
     read_only="${override_read_only}"
-  elif [[ -z "${override_read_only}" ]]; then
+  elif [[ -z "${read_only}" ]]; then
     read_only="false"
   fi
   if [[ -v override_quiet ]]; then
@@ -440,11 +454,11 @@ _show_config() {
   _msg_info "                 Key file:   $(_get "key" "file")"
   _msg_info "       GRUB compatibility:   $(_get "grub" "compatibility")"
   _msg_info "                Read only:   $(_get "read" "only")"
-  _msg_info "    cryptsetup extra args:   "
-  _display_flags                          "${_cryptsetup_args[*]}"
+  _msg_info "     extra format options:   "
+  _display_flags                          "${cryptsetup_args[*]}"
   _msg_info ""
   _msg_info "      device file:"
-  _msg_info "        ${_device}"
+  _msg_info "        ${device}"
 }
 
 # Colorized print
@@ -532,7 +546,6 @@ cryptsetup_args=(
   "$@"
 )
 _set_overrides
-
 _show_config
 _mkluks \
   "${device}" \
