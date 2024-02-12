@@ -249,12 +249,12 @@ _mkluks() {
   )
   if [[ "${_key_file}" != "" ]]; then
     _opts+=(
-      '--key-file='\""${_key_file}\""
+      --key-file=\'"${_key_file}"\'
     )
   fi
   if [[ "${_label}" != "" ]]; then
     _config_opts+=(
-      "--label='"${_label}"'"
+      --label=\'"${_label}"\'
     )
   fi
   if [[ "${_grub_compatibility}" == "true" ]]; then
@@ -422,11 +422,13 @@ _set_overrides() {
 # Show help usage, with an exit status.
 # $1: exit status number.
 _usage() {
+  local \
+    usage_text
   IFS='' \
     read \
       -r \
       -d '' \
-      usage_text << \
+      _usage_text << \
         ENDUSAGETEXT || true
 usage: $(_get "app" "name") [options] <device>
   options:
@@ -444,10 +446,7 @@ usage: $(_get "app" "name") [options] <device>
 ENDUSAGETEXT
   _printf \
     '%s\n' \
-    "$( \
-      _get \
-        "usage" \
-	"text")"
+    "${_usage_text}"
   exit \
     "${1}"
 }
