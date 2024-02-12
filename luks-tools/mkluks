@@ -485,7 +485,8 @@ _display_flags() {
 _show_config() {
   local \
     _build_date \
-    _pygmentize_opts=()
+    _pygmentize_opts=() \
+    _key
   _pygmentize_opts=(
     -l bash
     -O "style=emacs,linenos=1"
@@ -495,13 +496,25 @@ _show_config() {
       -v _build_date \
       '%(%FT%R%z)T' \
       "${SOURCE_DATE_EPOCH}"
+  _key="$( \
+    _get \
+      "key" \
+      "file")"
+  [[ "${_key}" == "" ]] && \
+    _key="Passphrase"
+  _label="$( \
+    _get \
+      "device" \
+      "label")"
+  [[ "${_key}" == "" ]] && \
+    _key="None"
   _msg_info "Build date: ${_build_date}"
   _msg_info ""
   _msg_info "${app_name} configuration:"
-  _msg_info "             Device label:   $(_get "device" "label")"
-  _msg_info "                 Key file:   $(_get "key" "file")"
-  _msg_info "         File system UUID:   $(_get "device" "fsuuid")"
-  _msg_info "                Integrity:   $(_get "device" "integrity")"
+  _msg_info "             Device label:   ${device_label:-None}"
+  _msg_info "                 Key file:   ${key_file:-Passphrase}"
+  _msg_info "         File system UUID:   ${device_fsuuid:-None}"
+  _msg_info "                Integrity:   ${device_integrity:-None}"
   _msg_info "       GRUB compatibility:   $(_get "grub" "compatibility")"
   _msg_info "                Read only:   $(_get "read" "only")"
   _msg_info "     Extra format options:   "
