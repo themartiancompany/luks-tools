@@ -244,7 +244,7 @@ _mkluks() {
   [[ "${_grub_compatibility}" == "true" ]] && \
   [[ "${_integrity}" != "" ]] && \
     _msg_error \
-      "GRUB doesn't support integrity" \
+      "GRUB doesn't support integrity layer" \
       1
 
   _tmpdir="$( \
