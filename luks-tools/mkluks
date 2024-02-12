@@ -383,6 +383,14 @@ _set_overrides() {
     "read" \
     "only" \
     "false"
+  _set_override \
+    "device" \
+    "label" \
+    ""
+  _set_override \
+    "key" \
+    "file" \
+    ""
   if [[ -v override_quiet ]]; then
     quiet="${override_quiet}"
   elif [[ -z "${quiet}" ]]; then
