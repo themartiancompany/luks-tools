@@ -461,15 +461,15 @@ _show_config() {
       -v build_date \
       '%(%FT%R%z)T' \
       "${SOURCE_DATE_EPOCH}"
-  _msg_info "${app_name} settings"
+  _msg_info "${app_name} configuration:"
   _msg_info "             Device label:   $(_get "device" "label")"
   _msg_info "                 Key file:   $(_get "key" "file")"
   _msg_info "       GRUB compatibility:   $(_get "grub" "compatibility")"
   _msg_info "                Read only:   $(_get "read" "only")"
-  _msg_info "     extra format options:   "
+  _msg_info "     Extra format options:   "
   _display_flags                          "${cryptsetup_args[*]}"
   _msg_info ""
-  _msg_info "      device file:"
+  _msg_info "      Device file:"
   _msg_info "        ${device}"
 }
 
