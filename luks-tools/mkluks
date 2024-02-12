@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
 
 _globals() {
   local \
@@ -9,7 +11,7 @@ _globals() {
   shopt \
     -s \
       extglob
-  
+
   # Control the environment
   umask \
     0022
@@ -26,8 +28,10 @@ _globals() {
       LANGUAGE
   [[ -v SOURCE_DATE_EPOCH ]] || \
     printf \
-      -v SOURCE_DATE_EPOCH \
-      '%(%s)T' -1
+      -v \
+        SOURCE_DATE_EPOCH \
+      '%(%s)T' \
+      -1
   export \
     SOURCE_DATE_EPOCH
   
@@ -50,8 +54,8 @@ _globals() {
       _OLDPWD)"
   unset \
     _OLDPWD
-
-  # Set application name from the script's file name
+  # Set application name
+  # from the script's file name
   app_name="${0##*/}"
 }
 
@@ -145,9 +149,7 @@ _set() {
   local \
     _obj="${1}" \
     _var="${2}" \
-    _value="${3}" \
-    _type
-
+    _value="${3}"
   printf \
     -v "${_obj}_${_var}" \
     "%s" \
@@ -214,6 +216,52 @@ _get() {
     "%s\n" \
     "${!_ref}"
 }
+
+_check_cmd(){
+  local \
+    _cmd="${1}" \
+    _cmd_var \
+    _flag="" \
+    _pkg
+  shift \
+    1
+  _pkg="$@"
+  _cmd_var="$( \
+    echo \
+      "${_cmd}" | \
+      sed \
+        "s/-/_/g")"
+  command \
+     -v \
+     "${_cmd}" &> /dev/null && \
+    printf \
+      -v \
+        "_${_cmd_var}" \
+      "$( \
+        command \
+          -v \
+          "${_cmd}")" && \
+    _flag=true
+  [ -e "${_path}/${_cmd}" ] && \
+    printf \
+      -v "_${_cmd_var}" \
+      "${_path}/${_cmd}" && \
+    _flag=true
+  if [[ "${_flag}" != "true" ]]; then
+    if [[ "${_pkg}" != "" ]]; then
+      _cmd="${_pkg}"
+    fi
+    _msg_error \
+      "Install ${_cmd}" \
+      1
+  fi
+}
+
+_requirements() {
+  _check_cmd \
+    "cryptsetup"
+}
+
 
 _mkluks() {
   local \
@@ -368,9 +416,9 @@ _set_override() {
   fi
 }
 
-# Re-assign an object variable
-# pointing to a path if an override variable
-# is defined, otherwise it defaults to an input path
+# Re-assign an object variable pointing to
+# a path if an override variable is defined,
+# otherwise it defaults to an input path
 # $1: object
 # $2: variable
 # $3: value (a path)
@@ -584,6 +632,8 @@ _sho() {
 _globals
 _global_variables
 
+_requirements
+
 # shellcheck disable=SC2034
 while \
   getopts \
@@ -600,7 +650,7 @@ while \
     c) override_color="y" ;;
     v) override_quiet="n" ;;
     h|?) _usage \
-	   1 ;;
+           0 ;;
     *)
     _msg_error \
       "Invalid argument '${arg}'" \
