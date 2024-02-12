@@ -509,7 +509,7 @@ _show_config() {
   [[ "${_key}" == "" ]] && \
     _key="None"
   _msg_info "Build date: ${_build_date}"
-  _msg_info ""
+  _msg_info "  ${_build_date}"
   _msg_info "${app_name} configuration:"
   _msg_info "             Device label:   ${device_label:-None}"
   _msg_info "                 Key file:   ${key_file:-Passphrase}"
