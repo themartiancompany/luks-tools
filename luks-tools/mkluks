@@ -232,7 +232,7 @@ _mkluks() {
     _fsuuid_set_cmd=() \
     _cryptsetup_opts=() \
     _key_size="512" \
-    _retries="10" \
+    _retries="0" \
     _tmpdir
   shift 7
   _cryptsetup_opts=(
@@ -247,7 +247,6 @@ _mkluks() {
     _msg_error \
       "GRUB doesn't support integrity layer" \
       1
-
   _tmpdir="$( \
     mktemp \
       -d)"
@@ -300,6 +299,7 @@ _mkluks() {
           "${_format_cmd[*]}" ) && \
     (( "${_retries}" < 10 )); do
     sleep 1
+    retries=$((retries + 1))
   done
   _format_cmd=(
     cryptsetup
@@ -308,12 +308,15 @@ _mkluks() {
         "${_config_opts[@]}"
         "${_device}"
   )
+  _retries=0
   while \
     ( ! eval \
           "${_config_cmd[*]}" ) && \
-    (( _retries < 10 )); do
+    (( "${_retries}" < 10 )); do
     sleep 1
+    retries=$((retries + 1))
   done
+  _retries=0
   _fsuuid_set_cmd=(
     cryptsetup
       -q
@@ -322,12 +325,14 @@ _mkluks() {
         --uuid="${_fsuuid}"
 	"${_device}"
   )
+  _retries=0
   [[ "${_fsuuid}" != "" ]] && \
     while \
      ( ! eval \
            "${_fsuuid_set_cmd[*]}" ) && \
-    (( _retries < 10 )); do
+    (( "${_retries}" < 10 )); do
      sleep 1
+    retries=$((retries + 1))
    done
 }
 
