@@ -249,7 +249,7 @@ _mkluks() {
   )
   if [[ "${_key_file}" != "" ]]; then
     _opts+=(
-      "--key-file='"${_key_file}"'"
+      '--key-file='"${_key_file}"
     )
   fi
   if [[ "${_label}" != "" ]]; then
