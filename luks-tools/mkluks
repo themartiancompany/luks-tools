@@ -596,6 +596,9 @@ shift \
   _usage \
     1
 device="${1}"
+device="$( \
+  realpath \
+    "${device}")"
 shift 1
 cryptsetup_args=(
   "$@"
