@@ -24,11 +24,14 @@ _volume="${1}"
 _output_dir="${2}"
 
 [[ "${_output_dir}" == "" ]] && \
-  _output_dir="/etc/keys"
-  # ^ canonical one?
-  #   cryptsetup-keys.d?
+  _output_dir="$( \
+    realpath \
+    "$( \
+      pwd)")"
+  # or "/etc/keys""?
+  #    ^ canonical one?
+  #      cryptsetup-keys.ds?
 
 _mklukskey \
   "${_volume}" \
-  "${_output_dir}" \
-
+  "${_output_dir}"
