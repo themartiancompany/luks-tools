@@ -465,17 +465,19 @@ _display_flags() {
 # Shows configuration options.
 _show_config() {
   local \
-    build_date \
+    _build_date \
     _pygmentize_opts=()
   _pygmentize_opts=(
     -l bash
-    -O style=emacs,linenos=1
+    -O "style=emacs,linenos=1"
   )
   TZ=UTC \
     printf \
-      -v build_date \
+      -v _build_date \
       '%(%FT%R%z)T' \
       "${SOURCE_DATE_EPOCH}"
+  _msg_info "Build date: ${_build_date}"
+  _msg_info ""
   _msg_info "${app_name} configuration:"
   _msg_info "             Device label:   $(_get "device" "label")"
   _msg_info "                 Key file:   $(_get "key" "file")"
