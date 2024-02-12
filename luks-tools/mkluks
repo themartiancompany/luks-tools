@@ -220,7 +220,7 @@ _mkluks() {
     _cryptsetup_opts=() \
     _key_size="512" \
     _tmpdir
-  shift 5
+  shift 6
   _cryptsetup_opts=(
     "$@"
   )
@@ -566,7 +566,7 @@ _show_config
 _mkluks \
   "${device}" \
   "${device_label}" \
-  "${device_fsuuid} \
+  "${device_fsuuid}" \
   "${key_file}" \
   "${grub_compatibility}" \
   "${read_only}" \
