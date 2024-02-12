@@ -62,6 +62,9 @@ _global_variables() {
   [[ -v TERMUX_VERSION ]] || \
     TERMUX_VERSION=""
   key_file=""
+  device_label=""
+  grub_compatibility=""
+  read_only=""
   color=""
   quiet=""
 }
@@ -191,20 +194,100 @@ _get() {
 
 _mkluks() {
   local \
-    _key_file \
-    _grub \
+    _device="${1}" \
+    _label="${2}"
+    _key_file="${3}" \
+    _fsuuid="${4}" \
+    _grub_compatibility="${5}" \
+    _read_only="${6}"
+    _opts=() \
+    _config_cmd=() \
+    _config_opts=() \
+    _format_cmd=() \
+    _format_opts=() \
+    _fsuuid_set_cmd=() \
+    _cryptsetup_opts=() \
+    _key_size="512" \
     _tmpdir
+  shift 5
+  _cryptsetup_opts=(
+    "$@"
+  )
   _tmpdir="$( \
     mktemp \
       -d)"
-  cryptsetup \
-    --type luks2 \
-    --sector-size=4096 \
-    --keysize=512 \
-    --pbkdf-memory=256 \
-    --integrity='hmac-sha512' \
-    --key-file="$()" \
-    "${_volume}"
+  _opts=(
+    --type luks2
+    --sector-size=4096
+    --key-size="${_key_size}"
+  )
+  if [[ "${_key_file}" != "" ]]; then
+    _opts+=(
+      "--key-file='"${_key_file}"'"
+    )
+  fi
+  if [[ "${_label}" != "" ]]; then
+    _config_opts+=(
+      "--label='"${_label}"'"
+    )
+  fi
+  if [[ "${_grub_compatibility}" == "true" ]]; then
+    _format_opts+=(
+      "--pbkdf=pbkdf2"
+    )
+  elif [[ "${_grub_compatibility}" == "false" ]]; then
+    _format_opts+=(
+      "--pbkdf-memory=256"
+      "--integrity=hmac-sha512"
+    )
+  fi
+  if [[ "${_read_only}" == "true" ]]; then
+    _config_opts+=(
+      --persistent
+      --integrity-no-journal
+    )
+  fi
+  _format_cmd=(
+    cryptsetup
+      -q
+      -y
+      luksFormat
+        "${_opts[@]}"
+        "${_format_opts[@]}"
+        "${_cryptsetup_opts[@]}"
+        "${_device}"
+  )
+  while \
+    ! eval \
+        "${_format_cmd[*]}"; do
+    sleep 1
+  done
+  _format_cmd=(
+    cryptsetup
+      config
+        "${_opts[@]}"
+        "${_config_opts[@]}"
+        "${_device}"
+  )
+  while \
+    ! eval \
+        "${_config_cmd[*]}"; do
+    sleep 1
+  done
+  _fsuuid_set_cmd=(
+    cryptsetup
+      -q
+      -y
+      luksUUID
+        --uuid="${_fsuuid}"
+	"${_device}"
+  )
+  [[ "${_fsuuid}" != "" ]] && \
+    while \
+     ! eval \
+         "${_fsuuid_set_cmd[*]}"; do
+     sleep 1
+   done
 }
 
 # Reassign an object variable
@@ -282,6 +365,11 @@ _set_overrides() {
     "grub" \
     "compatibility" \
     "false"
+  if [[ -v override_read_only ]]; then
+    read_only="${override_read_only}"
+  elif [[ -z "${override_read_only}" ]]; then
+    read_only="false"
+  fi
   if [[ -v override_quiet ]]; then
     quiet="${override_quiet}"
   elif [[ -z "${quiet}" ]]; then
@@ -307,7 +395,9 @@ usage: $(_get "app" "name") [options] <device>
   options:
      -k <key file>        Provide a key file
                           instead of a passphrase.
+     -l <label>           Label for the LUKS volume.
      -h                   This message.
+     -c                   Enable color output
      -v                   Enable verbose output
 ENDUSAGETEXT
   _printf \
@@ -346,9 +436,13 @@ _show_config() {
       '%(%FT%R%z)T' \
       "${SOURCE_DATE_EPOCH}"
   _msg_info "${app_name} settings"
+  _msg_info "             Device label:   $(_get "device" "label")"
+  _msg_info "                 Key file:   $(_get "key" "file")"
   _msg_info "       GRUB compatibility:   $(_get "grub" "compatibility")"
-  _msg_info "          cryptsetup args:   "
+  _msg_info "                Read only:   $(_get "read" "only")"
+  _msg_info "    cryptsetup extra args:   "
   _display_flags                          "${_cryptsetup_args[*]}"
+  _msg_info ""
   _msg_info "      device file:"
   _msg_info "        ${_device}"
 }
@@ -405,11 +499,13 @@ _global_variables
 
 while \
   getopts \
-    'k:c:vh?' \
+    'k:l:rcvh?' \
     arg; do
   case \
     "${arg}" in
     k) override_key_file="${OPTARG}" ;;
+    l) override_device_label="${OPTARG}" ;;
+    r) override_read_only="true" ;;
     c) override_color="y" ;;
     v) override_quiet="n" ;;
     h|?) _usage \
@@ -430,14 +526,18 @@ shift \
 (( $# < 1 )) && \
   _usage \
     1
-_device="${1}"
+device="${1}"
 shift 1
-_cryptsetup_args=(
+cryptsetup_args=(
   "$@"
 )
 _set_overrides
 
 _show_config
-# _mkluks \
-#   "${_device}" \
-#   "${_cryptsetup_args[@]}"
+_mkluks \
+  "${device}" \
+  "${device_label}" \
+  "${key_file}" \
+  "${grub_compatibility}" \
+  "${read_only}" \
+  "${cryptsetup_args[@]}"
