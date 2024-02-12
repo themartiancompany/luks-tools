@@ -229,7 +229,8 @@ _check_cmd(){
     "$@"
   )
   _cmd_var="$( \
-    echo \
+    printf \
+      "%s" \
       "${_cmd}" | \
       sed \
         "s/-/_/g")"
@@ -239,6 +240,7 @@ _check_cmd(){
     printf \
       -v \
         "_${_cmd_var}" \
+      "%s" \
       "$( \
         command \
           -v \
