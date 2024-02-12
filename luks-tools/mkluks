@@ -529,6 +529,7 @@ _sho() {
 _globals
 _global_variables
 
+# shellcheck disable=SC2034
 while \
   getopts \
     'k:l:f:rgcvh?' \
