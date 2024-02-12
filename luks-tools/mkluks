@@ -232,6 +232,7 @@ _mkluks() {
     _fsuuid_set_cmd=() \
     _cryptsetup_opts=() \
     _key_size="512" \
+    _retries="10" \
     _tmpdir
   shift 7
   _cryptsetup_opts=(
@@ -295,8 +296,9 @@ _mkluks() {
         "${_device}"
   )
   while \
-    ! eval \
-        "${_format_cmd[*]}"; do
+    ( ! eval \
+          "${_format_cmd[*]}" ) && \
+    (( "${_retries}" < 10 )); do
     sleep 1
   done
   _format_cmd=(
@@ -307,8 +309,9 @@ _mkluks() {
         "${_device}"
   )
   while \
-    ! eval \
-        "${_config_cmd[*]}"; do
+    ( ! eval \
+          "${_config_cmd[*]}" ) && \
+    (( _retries < 10 )); do
     sleep 1
   done
   _fsuuid_set_cmd=(
@@ -321,8 +324,9 @@ _mkluks() {
   )
   [[ "${_fsuuid}" != "" ]] && \
     while \
-     ! eval \
-         "${_fsuuid_set_cmd[*]}"; do
+     ( ! eval \
+           "${_fsuuid_set_cmd[*]}" ) && \
+    (( _retries < 10 )); do
      sleep 1
    done
 }
