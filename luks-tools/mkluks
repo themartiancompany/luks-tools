@@ -248,7 +248,9 @@ _check_cmd(){
     _flag=true
   [ -e "${_path}/${_cmd}" ] && \
     printf \
-      -v "_${_cmd_var}" \
+      -v \
+        "_${_cmd_var}" \
+      "%s" \
       "${_path}/${_cmd}" && \
     _flag=true
   if [[ "${_flag}" != "true" ]]; then
