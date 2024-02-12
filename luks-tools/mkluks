@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 
 _globals() {
+  local \
+    _OLDPWD
   set \
     -e \
     -u
@@ -31,8 +33,10 @@ _globals() {
   
   # Get script path
   _path="$( \
+    _OLDPWD="$( \
+      pwd)" && \
     export \
-      _OLDPWD="$(pwd)" && \
+      _OLDPWD && \
     cd \
       "$( \
 	dirname \
@@ -444,7 +448,7 @@ ENDUSAGETEXT
 _display_flags() {
   local \
     _flags=(
-      ${1}
+      "${1}"
     )
   for _flag \
     in "${_flags[@]}"; do
