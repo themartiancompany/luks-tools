@@ -278,6 +278,7 @@ _mkluks() {
     _format_cmd=() \
     _format_opts=() \
     _fsuuid_set_cmd=() \
+    _label_opts=() \
     _cryptsetup_opts=() \
     _key_size="512" \
     _retries="0" \
@@ -349,7 +350,7 @@ _mkluks() {
     sleep 1
     retries=$((retries + 1))
   done
-  _format_cmd=(
+  _config_cmd=(
     cryptsetup
       config
         "${_opts[@]}"
