@@ -392,6 +392,10 @@ _set_overrides() {
     "key" \
     "file" \
     ""
+  _set_override \
+    "device" \
+    "fsuuid" \
+    ""
   if [[ -v override_quiet ]]; then
     quiet="${override_quiet}"
   elif [[ -z "${quiet}" ]]; then
