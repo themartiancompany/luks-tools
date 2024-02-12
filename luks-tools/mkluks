@@ -108,7 +108,10 @@ _msg_info() {
 # $1: message string
 _msg_warning() {
   local \
-    _msg=("${1}")
+    _msg=()
+  _msg=(
+    "${1}"
+  )
   _printf \
     '[%s] WARNING: %s\n' \
     "${app_name}" \
@@ -120,12 +123,14 @@ _msg_warning() {
 # $2: exit code number (with 0 does not exit)
 _msg_error() {
   local \
-    _msg="${1}" \
+    _msg=(
+      "${1}"
+    ) \
     _error=${2}
   _printf \
     '[%s] ERROR: %s\n' \
     "${app_name}" \
-    "${_msg}" >&2
+    "${_msg[*]}" >&2
   if (( _error > 0 )); then
     exit "${_error}"
   fi
