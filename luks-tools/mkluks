@@ -526,7 +526,6 @@ _printf() {
   _sho \
     "$( \
       printf \
-        "%s" \
         "${_args[@]}")" \
     "${_pygmentize_opts[@]}"
 }
