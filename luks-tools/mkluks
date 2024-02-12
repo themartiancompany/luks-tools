@@ -379,11 +379,10 @@ _set_overrides() {
     "grub" \
     "compatibility" \
     "false"
-  if [[ -v override_read_only ]]; then
-    read_only="${override_read_only}"
-  elif [[ -z "${read_only}" ]]; then
-    read_only="false"
-  fi
+  _set_override \
+    "read" \
+    "only" \
+    "false"
   if [[ -v override_quiet ]]; then
     quiet="${override_quiet}"
   elif [[ -z "${quiet}" ]]; then
@@ -410,6 +409,11 @@ usage: $(_get "app" "name") [options] <device>
      -k <key file>        Provide a key file
                           instead of a passphrase.
      -l <label>           Label for the LUKS volume.
+     -r                   Whether the volume will be
+                          read-only.
+                          Default: false
+     -g                   Whether the volume has to be
+                          compatible with GRUB.
      -h                   This message.
      -c                   Enable color output
      -v                   Enable verbose output
@@ -513,13 +517,14 @@ _global_variables
 
 while \
   getopts \
-    'k:l:rcvh?' \
+    'k:l:rgcvh?' \
     arg; do
   case \
     "${arg}" in
     k) override_key_file="${OPTARG}" ;;
     l) override_device_label="${OPTARG}" ;;
     r) override_read_only="true" ;;
+    g) override_grub_compatibility="true" ;;
     c) override_color="y" ;;
     v) override_quiet="n" ;;
     h|?) _usage \
