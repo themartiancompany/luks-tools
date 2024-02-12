@@ -596,14 +596,18 @@ shift \
   _usage \
     1
 device="${1}"
-device="$( \
-  realpath \
-    "${device}")"
 shift 1
 cryptsetup_args=(
   "$@"
 )
 _set_overrides
+device="$( \
+  realpath \
+    "${device}")"
+[[ -e "${key_file}" ]] && \
+  key_file="$( \
+    realpath \
+      "${key_file}")"
 _show_config
 _mkluks \
   "${device}" \
