@@ -16,7 +16,7 @@ _mklukskey() {
     of="${_output_dir}/${_volume}.key"
 }
 
-(( $# < 1 ]] )) && \
+(( $# < 1 )) && \
   echo \
     "${app_name} <volume_name> (<output_dir>)"
 
