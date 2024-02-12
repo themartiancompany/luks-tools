@@ -63,6 +63,7 @@ _global_variables() {
     TERMUX_VERSION=""
   key_file=""
   device_label=""
+  device_fsuuid=""
   grub_compatibility=""
   read_only=""
   color=""
@@ -464,6 +465,7 @@ _show_config() {
   _msg_info "${app_name} configuration:"
   _msg_info "             Device label:   $(_get "device" "label")"
   _msg_info "                 Key file:   $(_get "key" "file")"
+  _msg_info "         File system UUID:   $(_get "device" "fsuuid")"
   _msg_info "       GRUB compatibility:   $(_get "grub" "compatibility")"
   _msg_info "                Read only:   $(_get "read" "only")"
   _msg_info "     Extra format options:   "
@@ -525,12 +527,13 @@ _global_variables
 
 while \
   getopts \
-    'k:l:rgcvh?' \
+    'k:l:f:rgcvh?' \
     arg; do
   case \
     "${arg}" in
     k) override_key_file="${OPTARG}" ;;
     l) override_device_label="${OPTARG}" ;;
+    f) override_device_fsuuid="${OPTARG}" ;;
     r) override_read_only="true" ;;
     g) override_grub_compatibility="true" ;;
     c) override_color="y" ;;
@@ -563,6 +566,7 @@ _show_config
 _mkluks \
   "${device}" \
   "${device_label}" \
+  "${device_fsuuid} \
   "${key_file}" \
   "${grub_compatibility}" \
   "${read_only}" \
