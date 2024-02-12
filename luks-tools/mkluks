@@ -41,6 +41,7 @@ _globals() {
       "$( \
 	dirname \
           "${BASH_SOURCE[0]}")" && \
+    # shellcheck disable=SC2005
     echo \
       "$(pwd)" && \
     cd \
