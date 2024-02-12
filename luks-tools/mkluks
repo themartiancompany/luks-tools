@@ -233,7 +233,7 @@ _mkluks() {
     _cryptsetup_opts=() \
     _key_size="512" \
     _tmpdir
-  shift 6
+  shift 7
   _cryptsetup_opts=(
     "$@"
   )
