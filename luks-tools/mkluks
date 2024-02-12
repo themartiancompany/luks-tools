@@ -32,6 +32,7 @@ _globals() {
     SOURCE_DATE_EPOCH
   
   # Get script path
+  # shellcheck disable=SC2005
   _path="$( \
     _OLDPWD="$( \
       pwd)" && \
@@ -41,7 +42,6 @@ _globals() {
       "$( \
 	dirname \
           "${BASH_SOURCE[0]}")" && \
-    # shellcheck disable=SC2005
     echo \
       "$(pwd)" && \
     cd \
