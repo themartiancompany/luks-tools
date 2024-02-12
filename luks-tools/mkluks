@@ -69,6 +69,7 @@ _global_variables() {
   key_file=""
   device_label=""
   device_fsuuid=""
+  device_integrity=""
   grub_compatibility=""
   read_only=""
   color=""
@@ -220,8 +221,9 @@ _mkluks() {
     _label="${2}" \
     _key_file="${3}" \
     _fsuuid="${4}" \
-    _grub_compatibility="${5}" \
-    _read_only="${6}" \
+    _integrity="${5}" \
+    _grub_compatibility="${6}" \
+    _read_only="${7}" \
     _opts=() \
     _config_cmd=() \
     _config_opts=() \
@@ -239,6 +241,12 @@ _mkluks() {
     _msg_error \
       "device file '${_device}' does not exist" \
       1
+  [[ "${_grub_compatibility}" == "true" ]] && \
+  [[ "${_integrity}" != "" ]] && \
+    _msg_error \
+      "GRUB doesn't support integrity" \
+      1
+
   _tmpdir="$( \
     mktemp \
       -d)"
@@ -261,10 +269,13 @@ _mkluks() {
     _format_opts+=(
       "--pbkdf=pbkdf2"
     )
-  elif [[ "${_grub_compatibility}" == "false" ]]; then
+  fi
+  if \
+    [[ "${_grub_compatibility}" == "false" ]] && \
+    [[ "${_integrity}" != "" ]]; then
     _format_opts+=(
       "--pbkdf-memory=256"
-      "--integrity=hmac-sha512"
+      "--integrity=${_integrity}"
     )
   fi
   if [[ "${_read_only}" == "true" ]]; then
@@ -407,6 +418,10 @@ _set_overrides() {
     "device" \
     "fsuuid" \
     ""
+  _set_override \
+    "device" \
+    "integrity" \
+    "hmac-sha512"
   if [[ -v override_quiet ]]; then
     quiet="${override_quiet}"
   elif [[ -z "${quiet}" ]]; then
@@ -438,8 +453,12 @@ usage: $(_get "app" "name") [options] <device>
      -r                   Whether the volume will be
                           read-only.
                           Default: false
+     -t                   Whether to disable integrity
+                          layer.
+                          Default: false.
      -g                   Whether the volume has to be
                           compatible with GRUB.
+                          Default: false
      -h                   This message.
      -c                   Enable color output
      -v                   Enable verbose output
@@ -482,6 +501,7 @@ _show_config() {
   _msg_info "             Device label:   $(_get "device" "label")"
   _msg_info "                 Key file:   $(_get "key" "file")"
   _msg_info "         File system UUID:   $(_get "device" "fsuuid")"
+  _msg_info "                Integrity:   $(_get "device" "integrity")"
   _msg_info "       GRUB compatibility:   $(_get "grub" "compatibility")"
   _msg_info "                Read only:   $(_get "read" "only")"
   _msg_info "     Extra format options:   "
@@ -545,13 +565,14 @@ _global_variables
 # shellcheck disable=SC2034
 while \
   getopts \
-    'k:l:f:rgcvh?' \
+    'k:l:f:trgcvh?' \
     arg; do
   case \
     "${arg}" in
     k) override_key_file="${OPTARG}" ;;
     l) override_device_label="${OPTARG}" ;;
     f) override_device_fsuuid="${OPTARG}" ;;
+    t) override_device_integrity="" ;;
     r) override_read_only="true" ;;
     g) override_grub_compatibility="true" ;;
     c) override_color="y" ;;
@@ -586,6 +607,7 @@ _mkluks \
   "${device_label}" \
   "${key_file}" \
   "${device_fsuuid}" \
+  "${device_integrity}" \
   "${grub_compatibility}" \
   "${read_only}" \
   "${cryptsetup_args[@]}"
