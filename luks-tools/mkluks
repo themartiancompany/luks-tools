@@ -570,8 +570,8 @@ _show_config
 _mkluks \
   "${device}" \
   "${device_label}" \
-  "${device_fsuuid}" \
   "${key_file}" \
+  "${device_fsuuid}" \
   "${grub_compatibility}" \
   "${read_only}" \
   "${cryptsetup_args[@]}"
