@@ -108,11 +108,11 @@ _msg_info() {
 # $1: message string
 _msg_warning() {
   local \
-    _msg="${1}"
+    _msg=("${1}")
   _printf \
     '[%s] WARNING: %s\n' \
     "${app_name}" \
-    "${_msg}" >&2
+    "${_msg[*]}" >&2
 }
 
 # Show an ERROR message then exit with status
