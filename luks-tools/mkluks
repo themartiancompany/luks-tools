@@ -61,7 +61,8 @@ _mkluks() {
     _key_size="512" \
     _retries="0" \
     _tmpdir
-  shift 7
+  shift \
+    7
   _cryptsetup_opts=(
     "$@"
   )
@@ -126,7 +127,8 @@ _mkluks() {
           "${_format_cmd[*]}" ) && \
     (( "${_retries}" < 10 )); do
     sleep 1
-    retries=$((retries + 1))
+    _retries=$(( \
+      _retries + 1))
   done
   _config_cmd=(
     cryptsetup
@@ -141,7 +143,8 @@ _mkluks() {
           "${_config_cmd[*]}" ) && \
     (( "${_retries}" < 10 )); do
     sleep 1
-    retries=$((retries + 1))
+    _retries=$(( \
+      _retries + 1))
   done
   _retries=0
   _fsuuid_set_cmd=(
@@ -159,7 +162,8 @@ _mkluks() {
            "${_fsuuid_set_cmd[*]}" ) && \
     (( "${_retries}" < 10 )); do
      sleep 1
-    retries=$((retries + 1))
+    _retries=$(( \
+      _retries + 1))
    done
 }
 
