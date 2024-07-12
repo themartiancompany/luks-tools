@@ -59,8 +59,10 @@ _mkluks() {
     _label_opts=() \
     _cryptsetup_opts=() \
     _key_size="512" \
+    _sector_size="4096" \
     _retries="0" \
-    _tmpdir
+    _tmpdir \
+    _os
   shift \
     7
   _cryptsetup_opts=(
@@ -75,6 +77,12 @@ _mkluks() {
     _msg_error \
       "GRUB doesn't support integrity layer" \
       1
+  _os="$( \
+    uname \
+      -o)"
+  if [[ "${_os}" == 'Android' ]]; then
+    _sector_size=512
+  fi
   _tmpdir="$( \
     mktemp \
       -d)"
@@ -82,7 +90,7 @@ _mkluks() {
     --type luks2
   )
   _format_opts=(
-    --sector-size=4096
+    --sector-size="${_sector_size}"
     --key-size="${_key_size}"
   )
   if [[ "${_key_file}" != "" ]]; then
