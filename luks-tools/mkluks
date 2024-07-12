@@ -80,6 +80,8 @@ _mkluks() {
       -d)"
   _opts=(
     --type luks2
+  )
+  _format_opts=(
     --sector-size=4096
     --key-size="${_key_size}"
   )
