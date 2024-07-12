@@ -185,7 +185,7 @@ _set_overrides() {
   _set_override \
     "device" \
     "label" \
-    ""
+    "label"
   _set_override \
     "key" \
     "file" \
@@ -233,9 +233,10 @@ usage:
      -r                   Whether the volume will be
                           read-only.
 			  Default: $(_get "read" "only")
-     -t                   Whether to disable integrity
-                          layer.
-                          Default: false.
+     -t                   Integrity layer, full list of values
+                          is in cryptsetup manual, set empty
+			  to disable ("", "hmac-sha512")
+			  Default: $(_get "device" "integrity")
      -g                   Whether the volume has to be
                           compatible with GRUB.
 			  Default: $(_get "grub" "compatibility")
@@ -305,14 +306,14 @@ _requirements
 # shellcheck disable=SC2034
 while \
   getopts \
-    'k:l:f:trgcvh?' \
+    'k:l:f:t:rgcvh?' \
     arg; do
   case \
     "${arg}" in
     k) override_key_file="${OPTARG}" ;;
     l) override_device_label="${OPTARG}" ;;
     f) override_device_fsuuid="${OPTARG}" ;;
-    t) override_device_integrity="" ;;
+    t) override_device_integrity="${OPTARG}" ;;
     r) override_read_only="true" ;;
     g) override_grub_compatibility="true" ;;
     c) override_color="y" ;;
