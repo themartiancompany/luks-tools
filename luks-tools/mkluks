@@ -30,6 +30,7 @@ _global_variables() {
   device_label=""
   device_fsuuid=""
   device_integrity=""
+  integrity_function=""
   grub_compatibility=""
   read_only=""
   color=""
@@ -41,6 +42,35 @@ _requirements() {
     "cryptsetup"
 }
 
+_detect_integrity_support() {
+  local \
+    _integrity='true' \
+    _os
+  _os="$( \
+    uname \
+      -o)"
+  if [[ "${_os}" == 'Android' ]]; then
+    _integrity='false'
+  fi
+  echo \
+    "${_integrity}"
+}
+
+
+_get_sector_size() {
+  local \
+    _size=4096 \
+    _os
+  _os="$( \
+    uname \
+      -o)"
+  if [[ "${_os}" == 'Android' ]]; then
+    _sector_size=512
+  fi
+  echo \
+    "${_sector_size}"
+}
+
 _mkluks() {
   local \
     _device="${1}" \
@@ -48,8 +78,9 @@ _mkluks() {
     _key_file="${3}" \
     _fsuuid="${4}" \
     _integrity="${5}" \
-    _grub_compatibility="${6}" \
-    _read_only="${7}" \
+    _integrity_function="${6}" \
+    _grub_compatibility="${7}" \
+    _read_only="${8}" \
     _opts=() \
     _config_cmd=() \
     _config_opts=() \
@@ -59,7 +90,7 @@ _mkluks() {
     _label_opts=() \
     _cryptsetup_opts=() \
     _key_size="512" \
-    _sector_size="4096" \
+    _sector_size \
     _retries="0" \
     _tmpdir \
     _os
@@ -77,12 +108,8 @@ _mkluks() {
     _msg_error \
       "GRUB doesn't support integrity layer" \
       1
-  _os="$( \
-    uname \
-      -o)"
-  if [[ "${_os}" == 'Android' ]]; then
-    _sector_size=512
-  fi
+  _sector_size="$( \
+    _get_sector_size)"
   _tmpdir="$( \
     mktemp \
       -d)"
@@ -113,7 +140,7 @@ _mkluks() {
     [[ "${_integrity}" != "" ]]; then
     _format_opts+=(
       "--pbkdf-memory=256"
-      "--integrity=${_integrity}"
+      "--integrity=${_integrity_function}"
     )
   fi
   if [[ "${_read_only}" == "true" ]]; then
@@ -207,6 +234,10 @@ _set_overrides() {
   _set_override \
     "device" \
     "integrity" \
+    "$(_detect_integrity_support)"
+  _set_override \
+    "integrity" \
+    "function" \
     "hmac-sha512"
   if [[ -v override_quiet ]]; then
     quiet="${override_quiet}"
@@ -240,13 +271,17 @@ usage:
      -k <key file>        Provide a key file
                           instead of a passphrase.
      -l <label>           Label for the LUKS volume.
-     -r                   Whether the volume will be
+			  Default: $(_get "device" "label")
+     -f <fsuuid>          Set specific UUID far the volume.
+			  Default: $(_get "device" "fsuuid")
+     -r                   Set the volume to be
                           read-only.
 			  Default: $(_get "read" "only")
-     -t                   Integrity layer, full list of values
-                          is in cryptsetup manual, set empty
-			  to disable ("", "hmac-sha512")
+     -T <bool>            Whether to enable integrity layer.
 			  Default: $(_get "device" "integrity")
+     -t <function>        Integrity function, full list
+                          in cryptsetup manual.
+			  Default: $(_get "integrity" "function")
      -g                   Whether the volume has to be
                           compatible with GRUB.
 			  Default: $(_get "grub" "compatibility")
@@ -300,7 +335,8 @@ _show_config() {
   _msg_info "             Device label:   ${device_label:-None}"
   _msg_info "                 Key file:   ${key_file:-Passphrase}"
   _msg_info "         File system UUID:   ${device_fsuuid:-None}"
-  _msg_info "                Integrity:   ${device_integrity:-None}"
+  _msg_info "                Integrity:   ${device_integrity}"
+  _msg_info "       Integrity function:   ${integrity_function}"
   _msg_info "       GRUB compatibility:   $(_get "grub" "compatibility")"
   _msg_info "                Read only:   $(_get "read" "only")"
   _msg_info "     Extra format options:   "
@@ -316,14 +352,15 @@ _requirements
 # shellcheck disable=SC2034
 while \
   getopts \
-    'k:l:f:t:rgcvh?' \
+    'k:l:f:T:t:rgcvh?' \
     arg; do
   case \
     "${arg}" in
     k) override_key_file="${OPTARG}" ;;
     l) override_device_label="${OPTARG}" ;;
     f) override_device_fsuuid="${OPTARG}" ;;
-    t) override_device_integrity="${OPTARG}" ;;
+    T) override_device_integrity="${OPTARG}" ;;
+    t) override_integrity_function="${OPTARG}" ;;
     r) override_read_only="true" ;;
     g) override_grub_compatibility="true" ;;
     c) override_color="y" ;;
@@ -370,6 +407,7 @@ _mkluks \
   "${key_file}" \
   "${device_fsuuid}" \
   "${device_integrity}" \
+  "${integrity_function}" \
   "${grub_compatibility}" \
   "${read_only}" \
   "${cryptsetup_args[@]}"
