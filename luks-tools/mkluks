@@ -40,6 +40,9 @@ _global_variables() {
 _requirements() {
   _check_cmd \
     "cryptsetup"
+  _check_cmd \
+    "uuidgen" \
+    "util-linux"
 }
 
 _detect_integrity_support() {
@@ -230,7 +233,7 @@ _set_overrides() {
   _set_override \
     "device" \
     "fsuuid" \
-    ""
+    "$(uuidgen)"
   _set_override \
     "device" \
     "integrity" \
@@ -272,7 +275,7 @@ usage:
                           instead of a passphrase.
      -l <label>           Label for the LUKS volume.
 			  Default: $(_get "device" "label")
-     -f <fsuuid>          Set specific UUID far the volume.
+     -u <fsuuid>          Set specific UUID far the volume.
 			  Default: $(_get "device" "fsuuid")
      -r                   Set the volume to be
                           read-only.
@@ -352,13 +355,13 @@ _requirements
 # shellcheck disable=SC2034
 while \
   getopts \
-    'k:l:f:T:t:rgcvh?' \
+    'k:l:u:T:t:rgcvh?' \
     arg; do
   case \
     "${arg}" in
     k) override_key_file="${OPTARG}" ;;
     l) override_device_label="${OPTARG}" ;;
-    f) override_device_fsuuid="${OPTARG}" ;;
+    u) override_device_fsuuid="${OPTARG}" ;;
     T) override_device_integrity="${OPTARG}" ;;
     t) override_integrity_function="${OPTARG}" ;;
     r) override_read_only="true" ;;
