@@ -15,14 +15,6 @@ source \
 
 
 _global_variables() {
-  [[ -v LDFLAGS ]] || \
-     LDFLAGS=""
-  [[ -v CPPFLAGS ]] || \
-    CPPFLAGS=""
-  [[ -v CFLAGS ]] || \
-    CFLAGS=""
-  [[ -v CXXFLAGS ]] || \
-    CXXFLAGS=""
   [[ -v TERMUX_VERSION ]] || \
     TERMUX_VERSION=""
   build_date=""
